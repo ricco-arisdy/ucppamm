@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:ucppam/screen/add_screen.dart';
 
 class AddTokoForm extends StatefulWidget {
   const AddTokoForm({Key? key}) : super(key: key);
@@ -15,7 +16,7 @@ class _AddTokoFormState extends State<AddTokoForm> {
   TextEditingController notelp = TextEditingController();
   String? kesanValue;
 
-  Future<void> _simpan() async {
+  Future _simpan() async {
     final response = await http.post(
       Uri.parse('http://192.168.100.6/api_pam/create.php'),
       body: {
@@ -26,10 +27,9 @@ class _AddTokoFormState extends State<AddTokoForm> {
       },
     );
     if (response.statusCode == 200) {
-      // Handle success
-    } else {
-      // Handle error
+      return true;
     }
+    return false;
   }
 
   @override
@@ -126,14 +126,36 @@ class _AddTokoFormState extends State<AddTokoForm> {
               },
             ),
             SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  _simpan();
-                }
-              },
-              child: Text('Simpan'),
-            ),
+            SizedBox(height: 10),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepOrange,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {
+                  if (formKey.currentState!.validate()) {
+                    _simpan().then((value) {
+                      final snackBar = SnackBar(
+                        content: Text(value
+                            ? 'Data berhasil disimpan'
+                            : 'Data gagal disimpan'),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      if (value) {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: ((context) => AddTokoScreen())),
+                          (route) => false,
+                        );
+                      }
+                    });
+                  }
+                },
+                child: Text('Simpan'),
+              ),
           ],
         ),
       ),
